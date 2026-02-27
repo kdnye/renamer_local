@@ -127,15 +127,9 @@ class InteractiveFileRenamer:
                 print('Please enter a valid number.')
 
     def _get_available_ollama_models(self) -> list[str]:
-        """Retrieve available Ollama models."""
+        """Retrieve available Ollama models using native client."""
         try:
-            result = subprocess.run(
-                ['curl', 'http://localhost:11434/api/tags'],
-                capture_output=True,
-                text=True,
-                timeout=5
-            )
-            models_data = json.loads(result.stdout)
+            models_data = self.ollama_client.list()
             return [model['name'] for model in models_data.get('models', [])]
         except Exception as e:
             print(f"Error retrieving Ollama models: {e}")
