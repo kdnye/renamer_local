@@ -252,9 +252,22 @@ class InteractiveFileRenamer:
             print(f"File {file_path} no longer exists.")
             return False, filename, "File does not exist"
 
-        try:
-            with open(file_path, 'r', encoding='utf-8') as f:
-                content = f.read(self.context_length)  # Use specified context length
+       try:
+            if file_path.suffix.lower() == '.pdf':
+                import pypdf
+                with open(file_path, 'rb') as f:
+                    reader = pypdf.PdfReader(f)
+                    content = ""
+                    for page in reader.pages:
+                        page_text = page.extract_text()
+                        if page_text:
+                            content += page_text + "\n"
+                        if len(content) >= self.context_length:
+                            break
+                    content = content[:self.context_length]
+            else:
+                with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                    content = f.read(self.context_length)
         except Exception as e:
             print(f"Error reading file {filename}: {e}")
             return False, filename, str(e)
